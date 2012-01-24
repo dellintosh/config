@@ -1,43 +1,52 @@
 # Path to your oh-my-zsh configuration.
-export ZSH=$HOME/.oh-my-zsh
+ZSH=$HOME/.oh-my-zsh
 
-# Set to the name theme to load.
+# Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
-export ZSH_THEME="mrtazz"
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="mrtazz"
+
+source ~/.bash_aliases
+
+# Example aliases
+alias zshconfig="mate ~/.zshrc"
+alias zsource="source ~/.zshrc"
+alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # Set to this to use case-sensitive completion
-# export CASE_SENSITIVE="true"
+# CASE_SENSITIVE="true"
 
 # Comment this out to disable weekly auto-update checks
-# export DISABLE_AUTO_UPDATE="true"
+# DISABLE_AUTO_UPDATE="true"
 
 # Uncomment following line if you want to disable colors in ls
-# export DISABLE_LS_COLORS="true"
+# DISABLE_LS_COLORS="true"
+
+# Uncomment following line if you want to disable autosetting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment following line if you want red dots to be displayed while waiting for completion
+COMPLETION_WAITING_DOTS="true"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git osx brew)
+plugins=(git osx brew python svn)
 
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-source ~/.bash_aliases
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11/bin
 
-export PATH=/usr/local/bin:$PATH
-export PATH=$PATH:/usr/local/mysql/bin
-export PATH=$PATH:/usr/local/share/python
-export PATH=$PATH:/opt/local/bin
-export PATH=$PATH:$HOME/bin
-export PATH=$PATH:$HOME/bin
+#iTerm / Maccy stuff
+growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
+export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
 export LNETPORTAL_URL=http://lnetportal.local/
 export DEBUG=1
 export MAXIMIZE=1
-export SANDBOX=/Users/jboatrig/src/portal
+export SANDBOX=~/src/portal
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
-
-#iTerm / Maccy stuff
-growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
-export EDITOR='vim'
