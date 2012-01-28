@@ -23,6 +23,9 @@ alias gco='git checkout'
 alias gitd='sudo git daemon --export-all --base-path=$HOME/src/ --reuseaddr --detach'
 alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'
 
+alias gsvnpull='git svn rebase'
+alias gsvnpush='git svn dcommit'
+
 #Linux
 alias pdbot='python /usr/lib/python2.5/site-packages/robotframework-2.1.1-py2.5.egg/robot/runner.py --noncritical noncritical --exclude notimplemented -L DEBUG'
 alias macterm='export TERM=xterm-color'
