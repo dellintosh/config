@@ -18,8 +18,8 @@ function drush_core_rsync($source, $destination, $additional_options = array()) 
   // Preflight destination in case it defines aliases used by the source
   _drush_sitealias_preflight_path($destination);
   // After preflight, evaluate file paths
-  $source_settings = drush_sitealias_evaluate_path($source, $additional_options);
-  $destination_settings = drush_sitealias_evaluate_path($destination, $additional_options);
+  $source_settings = drush_sitealias_evaluate_path($source, $additional_options, FALSE, "rsync");
+  $destination_settings = drush_sitealias_evaluate_path($destination, $additional_options, FALSE, "rsync");
   $source_path = $source_settings['evaluated-path'];
   $destination_path = $destination_settings['evaluated-path'];
 
@@ -29,10 +29,10 @@ function drush_core_rsync($source, $destination, $additional_options = array()) 
   if (!isset($destination_settings)) {
     return drush_set_error('DRUSH_BAD_PATH', dt('Could not evaluate destination path !path.', array('!path' => $destination)));
   }
-    
+
   // Check to see if this is an rsync multiple command (multiple sources and multiple destinations)
   $is_multiple = drush_do_multiple_command('rsync', $source_settings, $destination_settings, TRUE);
-  
+
   if ($is_multiple === FALSE) {
     // If the user path is the same for the source and the destination, then
     // always add a slash to the end of the source.  If the user path is not
@@ -95,7 +95,7 @@ function drush_core_call_rsync($source, $destination, $additional_options = arra
     }
   }
 
-  $mode = '-az';
+  $mode = '-akz';
   // Process --include-path and --exclude-path options the same way
   foreach (array('include', 'exclude') as $include_exclude) {
     // Get the option --include-path or --exclude-path and explode to an array of paths
@@ -197,9 +197,9 @@ function drush_core_call_rsync($source, $destination, $additional_options = arra
     'link-dest',
     'skip-compress',
     'filter',
-    'exclude',
+    // filter out 'exclude'; consistency with --include. Use --exclude-paths.
     'exclude-from',
-    'include',
+    // filter out 'include'; conflicts with global drush --include option. Use --include-paths.
     'include-from',
     'files-from',
     'address',
@@ -234,7 +234,7 @@ function drush_core_call_rsync($source, $destination, $additional_options = arra
         $test_option = 'remove-sent-files';
       }
     }
-    if ((isset($test_option)) && (isset($value))) {
+    if ((isset($test_option)) && (isset($value)  && !is_array($value))) {
       if ($value === TRUE) {
         $options .= " --$test_option";
       }
@@ -254,7 +254,7 @@ function drush_core_call_rsync($source, $destination, $additional_options = arra
   else {
     $result = drush_shell_exec($exec);
   }
-  
+
   if (!$result) {
     drush_set_error('DRUSH_RSYNC_FAILED', dt("Could not rsync from !source to !dest", array('!source' => $source, '!dest' => $destination)));
   }

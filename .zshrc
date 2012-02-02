@@ -7,8 +7,6 @@ ZSH=$HOME/.oh-my-zsh
 # time that oh-my-zsh is loaded.
 ZSH_THEME="mrtazz"
 
-source ~/.bash_aliases
-
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
 alias zsource="source ~/.zshrc"
@@ -50,3 +48,5 @@ export MAXIMIZE=1
 export SANDBOX="/src/portal"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
+
+source ~/.bash_aliases

@@ -1,21 +1,27 @@
 <?php
 
-/*
+/**
  * @file
  *   Tests for enable, disable, uninstall, pm-list commands.
  */
 
-class EnDisUnListCase extends Drush_TestCase {
+/**
+ *  @group slow
+ */
+class EnDisUnListCase extends Drush_CommandTestCase {
 
   public function testEnDisUnList() {
-    $this->setUpDrupal('dev', TRUE);
+    $sites = $this->setUpDrupal(1, TRUE);
     $options = array(
       'yes' => NULL,
       'pipe' => NULL,
-      'root' => $this->sites['dev']['root'],
-      'uri' => 'dev',
+      'root' => $this->webroot(),
+      'uri' => key($sites),
+      'cache' => NULL,
+      'skip' => NULL, // No FirePHP
+      'invoke' => NULL, // Don't validate options
     );
-    $this->drush('pm-download', array('devel-7.x-1.0'), $options);
+    $this->drush('pm-download', array('devel'), $options);
     $this->drush('pm-list', array(), $options + array('no-core' => NULL, 'status' => 'not installed'));
     $list = $this->getOutputAsList();
     $this->assertTrue(in_array('devel', $list));
@@ -43,11 +49,15 @@ class EnDisUnListCase extends Drush_TestCase {
     $list = $this->getOutputAsList();
     $this->assertTrue(in_array('devel', $list));
 
-
-    // We expect an exit code of 1 so just call execute() directly.
-    $exec = sprintf('%s variable-get %s --pipe --root=%s --uri=%s', UNISH_DRUSH, 'devel_query_display', $options['root'], $options['uri']);
-    $this->execute($exec, self::EXIT_ERROR);
+    $this->drush('variable-get', array('devel_query_display'), $options, NULL, NULL, self::EXIT_ERROR);
     $output = $this->getOutput();
     $this->assertEmpty($output, 'Devel variable was uninstalled.');
+
+    // Test pm-enable is able to download dependencies.
+    $this->drush('pm-download', array('pathauto'), $options);
+    $this->drush('pm-enable', array('pathauto'), $options + array('resolve-dependencies' => TRUE));
+    $this->drush('pm-list', array(), $options + array('status' => 'enabled'));
+    $list = $this->getOutputAsList();
+    $this->assertTrue(in_array('token', $list));
   }
 }

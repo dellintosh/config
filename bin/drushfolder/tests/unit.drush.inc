@@ -10,6 +10,10 @@
  * Implementation of hook_drush_command().
  */
 function unit_drush_command() {
+  $items['unit'] = array(
+    'description' => 'No-op command, used to test completion for commands that start the same as other commands.',
+    'bootstrap' => DRUSH_BOOTSTRAP_NONE,
+  );
   $items['unit-eval'] = array(
     'description' => 'Works like php-eval. Used for testing $command_specific context.',
     'bootstrap' => DRUSH_BOOTSTRAP_MAX,
@@ -19,16 +23,15 @@ function unit_drush_command() {
     'description' => 'Return an array indicating which invoke hooks got called.',
     'bootstrap' => DRUSH_BOOTSTRAP_NONE,
   );
+  $items['unit-batch'] = array(
+    'description' => 'Run a batch process.',
+    'bootstrap' => DRUSH_BOOTSTRAP_MAX,
+  );
+  $items['unit-return-options'] = array(
+    'description' => 'Return options as function result.',
+    'bootstrap' => DRUSH_BOOTSTRAP_NONE,
+  );    
   return $items;
-}
-
-/*
- * Dynamically append custom bash code to the generated .bashrc.
- *
- * @see coreCase::testCoreCLI().
- */
-function unit_cli_bashrc($drush_command, $interactive_mode) {
-  return drush_get_option('unit-extra');
 }
 
 // Implement each invoke hook with the same single line of code.
@@ -73,4 +76,51 @@ function unit_invoke_log($function = NULL) {
   else {
     return $called;
   }
+}
+
+/**
+ * Command callback.
+ */
+function drush_unit_batch() {
+  // Reduce php memory/time limits to test backend respawn.
+  // TODO.
+
+  $batch = array(
+    'operations' => array(
+       array('_drush_unit_batch_operation', array()),
+    ),
+    'finished' => '_drush_unit_batch_finished',
+    // 'file' => Doesn't work for us. Drupal 7 enforces this path
+    // to be relative to DRUPAL_ROOT.
+    // @see _batch_process().
+  );
+  batch_set($batch);
+  drush_backend_batch_process();
+
+  // Print the batch output.
+  drush_backend_output();
+}
+
+function _drush_unit_batch_operation(&$context) {
+  $context['message'] = "!!! ArrayObject does its job.";
+
+  for ($i = 0; $i < 5; $i++) {
+    drush_print("Iteration $i");
+  }
+  $context['finished'] = 1;
+}
+
+function _drush_unit_batch_finished() {
+  // Restore php limits.
+  // TODO.
+}
+
+// Return all of the option values passed in to this routine, minus the
+// global options.
+function drush_unit_return_options() {
+  $all_option_values = array_merge(drush_get_context('cli'), drush_get_context('stdin'));
+  foreach (drush_get_global_options() as $key => $info) {
+    unset($all_option_values[$key]);
+  }
+  return $all_option_values;
 }

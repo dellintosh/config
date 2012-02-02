@@ -26,7 +26,8 @@ drush to compose the names of the functions it will call, so
 choose wisely.
 <p>
 The example drush command, 'make-me-a-sandwich', is stored
-in the 'sandwich' commandfile, 'sandwich.drush.inc'.
+in the 'sandwich' commandfile, 'sandwich.drush.inc'.  You can
+find this file in the 'examples' directory in the drush distribution.
 <p>
 Drush searches for commandfiles in the following locations:
 <ul>
@@ -39,6 +40,10 @@ Drush searches for commandfiles in the following locations:
 <li>The ".drush" folder in the user's HOME folder.
 
 <li>All modules in the current Drupal installation
+
+<li>Folders and files containing other versions of drush in their names will
+be *skipped* (e.g. devel.drush4.inc or drush4/devel.drush.inc).  Names
+containing the current version of drush (e.g. devel.drush5.inc) will be loaded.</li>
 </ul> <p>
 Note that modules in the current Drupal installation will only
 be considered if drush has bootstrapped to at least the DRUSH_BOOSTRAP_SITE
@@ -90,14 +95,6 @@ are shown below.
      primary command name, so pm-download will still be used
      to generate the command hook, etc.
 
-<li>'deprecated-aliases':
-
-     Works just like 'aliases', but does not
-     appear in help.  Used in instances where the drush
-     maintainers intend to eventually remove support for a
-     command alias.  If someone runs a drush command using a
-     deprecated alias, drush will print a warning message.
-
 <li>'command hook':
 
      Change the name of the function drush will
@@ -130,10 +127,45 @@ are shown below.
      An array of arguments that are understood by the command.
      Used by `drush help` only.
 
+<li>'required-arguments':
+
+     Defaults to FALSE; TRUE if all of the arguments are required.
+     Set to an integer count of required arguments if only some are
+     required.
+
 <li>'options':
 
      An array of options that are understood by the command.
-     Used by `drush help` only.
+     Any option that the command expects to be able to query via
+     drush_get_option _must_ be listed in the options array.
+     If it is not, users will get an error about an "Unknown option"
+     when they try to specify the option on the command line.
+<p>
+     The value of each option may be either a simple string containing
+     the option description, or an array containing the following
+     information:
+
+     <ul>
+          <li>'description': A description of the option.
+          <li>'required': The option must be specified, or an error is returned.
+          <li>'hidden': The option is not shown in the help output (rare).
+     </ul>
+
+<li>'allow-additional-options':
+
+     If TRUE, then the ordinary testing to see if options exist
+     will be skipped.  Examples of where this is done includes
+     the core-rsync command, which passes options along to the
+     rsync shell command.
+     <p>
+     This item may also contain a list of other commands that
+     are invoked as subcommands (e.g. the pm-update
+     command calls pm-updatecode and updatedb commands).  When
+     this is done, the options from the subcommand may be used
+     on the commandline, and are also listed in the command's
+     `help` output.
+     <p>
+     Defaults to FALSE.
 
 <li>'examples':
 
@@ -157,6 +189,8 @@ are shown below.
       <li>DRUSH_BOOTSTRAP_DRUPAL_LOGIN
       <li>DRUSH_BOOTSTRAP_MAX
 </ul>
+     The default value is DRUSH_BOOTSTRAP_DRUPAL_LOGIN.
+
      See `drush topic docs-bootstrap`.
 
 <li>'core':
@@ -233,6 +267,16 @@ a variable number of command line arguments can use the standard
 php function func_get_args() to get them all in an array for easy
 processing.
 <p>
+It is also very easy to query the command options using the
+function drush_get_option().  For example, in the drush_sandwich_make_me_a_sandwich()
+function, the --spreads option is retrieved as follows:
+<pre>
+        $str_spreads = '';
+        if ($spreads = drush_get_option('spreads')) {
+          $list = implode(' and ', explode(',', $spreads));
+          $str_spreads = ' with just a dash of ' . $list;
+        }
+</pre><p>
 Note that drush will actually call a sequence of functions before
 and after your drush command function.  One of these hooks is the
 "validate" hook.  The 'sandwich' commandfile provides a validate
@@ -252,3 +296,6 @@ policy functions with validate hooks, and `drush topic docs-api`
 for information on how the command hook process works.  Also,
 the list of defined drush error codes can be found in
 `drush topic docs-errorcodes`.
+<p>
+To see the full implementation of the sample 'make-me-a-sandwich'
+command, see `drush topic docs-examplecommand`.

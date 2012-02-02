@@ -6,6 +6,8 @@
 function cache_drush_command() {
   $items = array();
 
+  // We specify command callbacks here because the defaults would collide with
+  // the drush cache api functions.
   $items['cache-get'] = array(
     'description' => 'Fetch a cached object and display it.',
     'examples' => array(
@@ -16,16 +18,20 @@ function cache_drush_command() {
       'cid' => 'The id of the object to fetch.',
       'bin' => 'Optional. The cache bin to fetch from.',
     ),
+    'required-arguments' => 1,
     'options' => array(
       'format' => 'Format to output the object. Use "print_r" for print_r (default), "export" for var_export, and "json" for JSON.',
     ),
+    'callback' => 'drush_cache_command_get',
     'aliases' => array('cg'),
   );
   $items['cache-clear'] = array(
+    'bootstrap' => DRUSH_BOOTSTRAP_MAX,
     'description' => 'Clear a specific cache, or all drupal caches.',
     'arguments' => array(
       'type' => 'The particular cache to clear. Omit this argument to choose from available caches.',
     ),
+    'callback' => 'drush_cache_command_clear',
     'aliases' => array('cc'),
   );
   $items['cache-set'] = array(
@@ -36,10 +42,12 @@ function cache_drush_command() {
       'bin' => 'Optional. The cache bin to store the object in.',
       'expire' => 'Optional. CACHE_PERMANENT, CACHE_TEMPORARY, or a Unix timestamp.',
     ),
+    'required-arguments' => 2,
     'options' => array(
       'format' => 'Format to parse the object. Use "string" for string (default), and "json" for JSON.',
       'cache-get' => 'If the object is the result a previous fetch from the cache, only store the value in the "data" property of the object in the cache.',
     ),
+    'callback' => 'drush_cache_command_set',
     'aliases' => array('cs'),
   );
 
@@ -47,43 +55,36 @@ function cache_drush_command() {
 }
 
 /**
+ * Command argument complete callback.
+ *
+ * @return
+ *   Array of clear types.
+ */
+function cache_cache_command_clear_complete() {
+  return array('values' => array_keys(drush_cache_clear_types()));
+}
+
+/**
  * Command callback for drush cache-clear.
  */
-function drush_cache_clear($type = NULL) {
-  switch (drush_drupal_major_version()) {
-    case 5:
-      // clear preprocessor cache
-      drupal_clear_css_cache();
+function drush_cache_command_clear($type = NULL) {
+  $types = drush_cache_clear_types();
 
-      // clear core tables
-      $core = array('cache', 'cache_filter', 'cache_menu', 'cache_page');
-      $alltables = array_merge($core, module_invoke_all('devel_caches'));
-      foreach ($alltables as $table) {
-        cache_clear_all('*', $table, TRUE);
-      }
-      drush_print(dt('Cache cleared.'));
-      break;
-    case 6:
-    case 7:
-    default:
-      $types = drush_cache_clear_types();
-      // Check if the provided type ($type) is a valid cache type.
-      if ($type && !key_exists($type, $types)) {
-        return drush_set_error(dt("'!type' cache is not a valid cache type", array('!type' => $type)));
-      }
+  // Check if the provided type ($type) is a valid cache type.
+  if ($type && !key_exists($type, $types)) {
+    return drush_set_error(dt("'!type' cache is not a valid cache type", array('!type' => $type)));
+  }
 
-      if ($type) {
-        drush_op($types[$type]);
-        drush_log(dt("'!name' cache was cleared", array('!name' => $type)), 'success');
-      }
-      else {
-        $choice = drush_choice($types, 'Enter a number to choose which cache to clear.', '!key');
-        if ($choice !== FALSE) {
-          call_user_func($types[$choice]);
-          drush_log(dt("'!name' cache was cleared", array('!name' => $choice)), 'success');
-        }
-      }
-      break;
+  if ($type) {
+    drush_op($types[$type]);
+    drush_log(dt("'!name' cache was cleared", array('!name' => $type)), 'success');
+  }
+  else {
+    $choice = drush_choice($types, 'Enter a number to choose which cache to clear.', '!key');
+    if ($choice !== FALSE) {
+      call_user_func($types[$choice]);
+      drush_log(dt("'!name' cache was cleared", array('!name' => $choice)), 'success');
+    }
   }
 }
 
@@ -95,7 +96,7 @@ function drush_cache_clear($type = NULL) {
  * @param $bin
  *   Optional parameter to specify a specific bin to fetch from.
  */
-function drush_cache_get($cid = NULL, $bin = NULL) {
+function drush_cache_command_get($cid = NULL, $bin = NULL) {
   if (!$cid) {
     drush_log(dt('You must specify a cache id to fetch.'), 'error');
     return;
@@ -107,18 +108,7 @@ function drush_cache_get($cid = NULL, $bin = NULL) {
 
   $result = cache_get($cid, $bin);
   if (!empty($result)) {
-    switch (drush_get_option('format', 'print_r')) {
-      case 'export':
-        drush_print(var_export($result, TRUE));
-        return;
-      case 'json':
-        drush_print(drush_json_encode($result));
-        return;
-      case 'print_r':
-      default:
-        drush_print_r($result);
-        return;
-    }
+    drush_print(drush_format($result));
   }
   else {
     drush_log(dt('The !cid object in the !bin cache bin was not found.', array('!cid' => $cid, '!bin' => $bin)), 'error');
@@ -137,17 +127,7 @@ function drush_cache_get($cid = NULL, $bin = NULL) {
  * @param $expire
  *   Optional parameter to specify the expiry of the cached object.
  */
-function drush_cache_set($cid = NULL, $data = '', $bin = NULL, $expire = CACHE_PERMANENT) {
-  if (!$cid) {
-    drush_log(dt('You must specify a cache id to set.'), 'error');
-    return;
-  }
-
-  if ($data === '') {
-    drush_log(dt('The data to set must be non-empty.'), 'error');
-    return;
-  }
-
+function drush_cache_command_set($cid = NULL, $data = '', $bin = NULL, $expire = CACHE_PERMANENT) {
   if (!$bin) {
     $bin = 'cache';
   }
@@ -167,36 +147,34 @@ function drush_cache_set($cid = NULL, $data = '', $bin = NULL, $expire = CACHE_P
     $data = $data->data;
   }
 
-  switch(drush_drupal_major_version()) {
-    case 5:
-      cache_set($cid, $bin, $data, $expire);
-      break;
-    case 6:
-    case 7:
-    default:
-      cache_set($cid, $data, $bin, $expire);
-  }
+  cache_set($cid, $data, $bin, $expire);
 }
 
 function drush_cache_clear_types() {
   $types = array(
-    'all' => 'drupal_flush_all_caches',
-    'theme registry' => 'drush_cache_clear_theme_registry',
-    'menu' => 'menu_rebuild',
-    'css+js' => 'drush_cache_clear_css_js',
-    'block' => 'drush_cache_clear_block',
-    'module list' => 'drush_get_modules',
-    'theme list' => 'drush_get_themes',
+    'all' => 'drush_cache_clear_both',
+    'drush' => 'drush_cache_clear_drush',
   );
+  if (drush_has_boostrapped(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+    $types += array(
+      'theme-registry' => 'drush_cache_clear_theme_registry',
+      'menu' => 'menu_rebuild',
+      'css-js' => 'drush_cache_clear_css_js',
+      'block' => 'drush_cache_clear_block',
+      'module-list' => 'drush_get_modules',
+      'theme-list' => 'drush_get_themes',
+    );
+    if (count(module_implements('node_grants'))) {
+      $types['nodeaccess'] = 'node_access_rebuild';
+    }
+  }
+
   if (drush_drupal_major_version() >= 7) {
     $types['registry'] = 'registry_update';
   }
-  elseif (drush_drupal_major_version() == 6 && module_exists('autoload')) {
+  elseif (drush_drupal_major_version() == 6 && function_exists('module_exists') && module_exists('autoload')) {
     // TODO: move this to autoload module.
     $types['registry'] = 'autoload_registry_update';
-  }
-  if (count(module_implements('node_grants'))) {
-    $types['nodeaccess'] = 'node_access_rebuild';
   }
 
   // Include the appropriate environment engine, so callbacks can use core
@@ -205,6 +183,7 @@ function drush_cache_clear_types() {
 
   // Command files may customize $types as desired.
   drush_command_invoke_all_ref('drush_cache_clear', $types);
+
   return $types;
 }
 
@@ -225,3 +204,20 @@ function drush_cache_clear_block() {
   cache_clear_all(NULL, 'cache_block');
 }
 
+/**
+ * Clear caches internal to drush core.
+ */
+function drush_cache_clear_drush() {
+  drush_cache_clear_all(NULL, 'default'); // commandfiles, etc.
+  drush_cache_clear_all(NULL, 'complete'); // completion
+}
+
+/**
+ * Clear caches internal to Drush core and Drupal.
+ */
+function drush_cache_clear_both() {
+  drush_cache_clear_drush();
+  if (drush_has_boostrapped(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+    drupal_flush_all_caches();
+  }
+}

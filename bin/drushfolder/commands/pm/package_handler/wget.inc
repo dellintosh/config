@@ -24,6 +24,8 @@ function package_handler_validate() {
   if (!$success) {
     return drush_set_error('DRUSH_SHELL_COMMAND_NOT_FOUND', dt('wget nor curl executables found.'));
   }
+
+  return TRUE;
 }
 
 /**
@@ -46,14 +48,11 @@ function package_handler_download_project(&$request, $release) {
     }
   }
 
-  $filename = explode('/', $release['download_link']);
-  $filename = array_pop($filename);
-
-  // Download the project.
-  if (!drush_shell_exec("wget -P . %s", $release['download_link'])) {
-    drush_shell_exec("curl -O %s", $release['download_link']);
-  }
-  if (file_exists($filename) || drush_get_context('DRUSH_SIMULATE')) {
+  // Dev snapshots can be cached for 4 hours and releases for 1 year.
+  $max_age = strpos($release['download_link'], '-dev') !== FALSE ? 3600*4 : 86400*365;
+  $filename = basename($release['download_link']);
+  $path = drush_download_file($release['download_link'], $request['base_project_path'] . $filename, $max_age);
+  if ($path || drush_get_context('DRUSH_SIMULATE')) {
     drush_log("Downloading " . $filename . " was successful.");
   }
   else {
@@ -61,9 +60,8 @@ function package_handler_download_project(&$request, $release) {
   }
 
   // Check Md5 hash.
-  if (drush_op('md5_file', $filename) != $release['mdhash'] && !drush_get_context('DRUSH_SIMULATE')) {
+  if (drush_op('md5_file', $path) != $release['mdhash'] && !drush_get_context('DRUSH_SIMULATE')) {
     drush_set_error('DRUSH_PM_FILE_CORRUPT', "File $filename is corrupt (wrong md5 checksum).");
-    drush_op('unlink', $filename);
     return FALSE;
   }
   else {
@@ -71,14 +69,12 @@ function package_handler_download_project(&$request, $release) {
   }
 
   // Extract the tarball.
-  $file_list = drush_tarball_extract($filename, $request['base_project_path'], TRUE);
-  drush_op('unlink', $filename);
+  $file_list = drush_tarball_extract($path, $request['base_project_path'], TRUE);
 
   // Move untarred directory to project_dir, if distinct.
   if (($request['project_type'] == 'core') || (($request['project_type'] == 'profile') && (drush_get_option('variant', 'core') == 'core'))) {
     // Obtain the dodgy project_dir for drupal core.
-
-    $project_dir = rtrim($file_list[0], DIRECTORY_SEPARATOR);
+    $project_dir = drush_trim_path($file_list[0]);
     if ($request['project_dir'] != $project_dir) {
       $path = $request['base_project_path'];
       drush_move_dir($path . '/'. $project_dir, $path . '/' . $request['project_dir']);

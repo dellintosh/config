@@ -4,11 +4,14 @@
 * @file
 *  For now we only test sql-sync in simulated mode.
 *
-*  Future: Using two copies of Drupal, we could test 
+*  Future: Using two copies of Drupal, we could test
 *  overwriting one site with another.
 */
 
-class sqlSyncTest extends Drush_TestCase {
+/*
+ *  @group slow
+ */
+class sqlSyncTest extends Drush_CommandTestCase {
 
   /*
    * Covers the following responsibilities.
@@ -18,16 +21,38 @@ class sqlSyncTest extends Drush_TestCase {
    * General handling of site aliases will be in sitealiasTest.php.
    */
   public function testLocalSqlSync() {
-    $this->setUpDrupal('dev', TRUE);
-    $this->setUpDrupal('stage', TRUE);
-    $dump_dir = UNISH_SANDBOX . "/dump-dir";
-    mkdir($dump_dir);
+    if (strpos(UNISH_DB_URL, 'sqlite') !== FALSE) {
+      $this->markTestSkipped('SQL Sync does not apply to SQLite.');
+      return;
+    }
 
+    $sites = $this->setUpDrupal(2, TRUE);
+    return $this->localSqlSync();
+  }
+  /**
+   * Do the same test as above, but use Drupal 6 sites instead of Drupal 7.
+   */
+  public function testLocalSqlSyncD6() {
+    if (strpos(UNISH_DB_URL, 'sqlite') !== FALSE) {
+      $this->markTestSkipped('SQL Sync does not apply to SQLite.');
+      return;
+    }
+
+    $this->setUpBeforeClass();
+    $sites = $this->setUpDrupal(2, TRUE, '6');
+    return $this->localSqlSync();
+  }
+  
+  public function localSqlSync() {
+    $dump_dir = UNISH_SANDBOX . "/dump-dir";
+    if (!is_dir($dump_dir)) {
+      mkdir($dump_dir);
+    }
     // Create a user in the staging site
     $name = 'joe.user';
     $mail = "joe.user@myhome.com";
     $options = array(
-      'root' => $this->sites['stage']['root'],
+      'root' => $this->webroot(),
       'uri' => 'stage',
       'yes' => NULL,
     );
@@ -40,7 +65,7 @@ class sqlSyncTest extends Drush_TestCase {
       'dump-dir' => $dump_dir
     );
     $this->drush('sql-sync', array('@stage', '@dev'), $sync_options);
-    
+
     // Confirm that the sample user has the correct email address on the staging site
     $this->drush('user-information', array($name), $options + array('pipe' => NULL));
     $output = $this->getOutput();
@@ -48,9 +73,9 @@ class sqlSyncTest extends Drush_TestCase {
     $uid = $row[1];
     $this->assertEquals($mail, $row[2], 'email address is unchanged on source site.');
     $this->assertEquals($name, $row[0]);
-    
+
     $options = array(
-      'root' => $this->sites['dev']['root'],
+      'root' => $this->webroot(),
       'uri' => 'dev',
       'yes' => NULL,
     );
@@ -59,7 +84,7 @@ class sqlSyncTest extends Drush_TestCase {
     $output = $this->getOutput();
     $row  = str_getcsv($output);
     $uid = $row[1];
-    $this->assertEquals("user+2@localhost", $row[2], 'email address was sanitized on destination site.');
-    $this->assertEquals($name, $row[0]);    
+    $this->assertEquals("user+$uid@localhost", $row[2], 'email address was sanitized on destination site.');
+    $this->assertEquals($name, $row[0]);
   }
 }

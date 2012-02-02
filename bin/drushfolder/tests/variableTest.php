@@ -4,16 +4,15 @@
  * @file
  *   Tests for enable, disable, uninstall, pm-list commands.
  */
-class VariableCase extends Drush_TestCase {
+class VariableCase extends Drush_CommandTestCase {
 
   function testVariable() {
-    $env = 'dev';
-    $this->setUpDrupal($env, TRUE);
+    $sites = $this->setUpDrupal(1, TRUE);
     $options = array(
       'yes' => NULL,
       'pipe' => NULL,
-      'root' => $this->sites[$env]['root'],
-      'uri' => $env,
+      'root' => $this->webroot(),
+      'uri' => key($sites),
     );
 
     $this->drush('variable-set', array('date_default_timezone', 'US/Mountain'), $options);

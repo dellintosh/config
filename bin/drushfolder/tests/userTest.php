@@ -4,20 +4,23 @@
  * @file
  *   Tests for user.drush.inc
  */
-class userCase extends Drush_TestCase {
+
+/*
+ *  @group slow
+ */
+class userCase extends Drush_CommandTestCase {
 
   /*
    * Create, edit, block, and cancel users.
    */
   public function testUser() {
     // user-create
-    $env = 'dev';
-    $this->setUpDrupal($env, TRUE);
-    $root = $this->sites[$env]['root'];
+    $sites = $this->setUpDrupal(1, TRUE);
+    $root = $this->webroot();
     $name = "example";
     $options = array(
       'root' => $root,
-      'uri' => $env,
+      'uri' => key($sites),
       'yes' => NULL,
     );
     $this->drush('user-create', array($name), $options + array('password' => 'password', 'mail' => "example@example.com"));
@@ -52,7 +55,7 @@ class userCase extends Drush_TestCase {
     $this->drush('user-information', array($name), $options + array('pipe' => NULL));
     $output = $this->getOutput();
     $row  = str_getcsv($output);
-    $this->assertEquals('authenticated user, administrator', $row[4], 'User has administrator role.');
+    $this->assertEquals('authenticated user,administrator', $row[4], 'User has administrator role.');
 
     // user-remove-role
     $this->drush('user-remove-role', array('administrator', $name), $options);
@@ -64,7 +67,7 @@ class userCase extends Drush_TestCase {
     // user-password
     $newpass = 'newpass';
     $this->drush('user-password', array($name), $options + array('password' => $newpass));
-    $eval = "require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');";
+    $eval = "require_once DRUSH_DRUPAL_CORE . '/' . variable_get('password_inc', 'includes/password.inc');";
     $eval .= "\$account = user_load_by_name('example');";
     $eval .= "print (string) user_check_password('$newpass', \$account)";
     $this->drush('php-eval', array($eval), $options);

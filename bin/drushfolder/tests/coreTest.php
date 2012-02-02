@@ -4,12 +4,16 @@
  * @file
  *   Tests for core commands.
  */
-class coreCase extends Drush_TestCase {
+class coreCase extends Drush_CommandTestCase {
 
   /*
    * Test standalone php-script scripts. Assure that script args and options work.
    */
   public function testStandaloneScript() {
+    if ($this->is_windows()) {
+      $this->markTestSkipped('Standalone scripts not currently available on Windows.');
+    }
+
     $this->drush('version', array('drush_version'), array('pipe' => NULL));
     $standard = $this->getOutput();
 
@@ -31,16 +35,19 @@ drush_invoke("version", $arg);
   }
 
   function testDrupalDirectory() {
-    $this->setUpDrupal('dev', TRUE);
-    $root = $this->sites['dev']['root'];
+    $this->setUpDrupal(1, TRUE);
+    $root = $this->webroot();
     $options = array(
       'root' => $root,
-      'uri' => 'dev',
+      'uri' => key($this->sites),
       'verbose' => NULL,
+      'skip' => NULL, // No FirePHP
       'yes' => NULL,
+      'cache' => NULL,
+      'invoke' => NULL, // invoke from script: do not verify options
     );
-    $this->drush('pm-download', array('devel-7.x-1.0'), $options);
-    $this->drush('pm-enable', array('menu', 'devel'), $options);
+    $this->drush('pm-download', array('devel'), $options);
+    $this->drush('pm-enable', array('devel', 'menu'), $options);
 
     $this->drush('drupal-directory', array('devel'), $options);
     $output = $this->getOutput();
@@ -55,61 +62,38 @@ drush_invoke("version", $arg);
     $this->assertEquals($root . '/sites/all/modules', $output);
   }
 
-  function testCoreCLI() {
-    /*
-     * @todo
-     *   - BASHRC_PATH. Same file cleanup woes as contextTest.
-     *   - DRUSH_CLI
-     *   - INITIAL_SITE
-     *   - PS1. Hard to test in non interactive session?
-     *   - on
-     *   - use
-     *   - cd, cdd, lsd
-     *   - override, contextual
-     */
-
-    // Exercise core-cli's interactive mode.
-    // Include unit.drush.inc commandfile.
+  function testCoreRequirements() {
+    $this->setUpDrupal(1, TRUE);
+    $root = $this->webroot();
     $options = array(
-      'include' => dirname(__FILE__),
+      'root' => $root,
+      'uri' => key($this->sites),
+      'pipe' => NULL,
+      'ignore' => 'cron,http requests,update_core', // no network access when running in tests, so ignore these
+      'invoke' => NULL, // invoke from script: do not verify options
     );
-    // These commands will throw a failure if they return non-zero exit code.
-    // Assure that we create a bash function for command names.
-    $options['unit-extra'] = 'core-status;exit';
-    $this->drush('core-cli', array(), $options);
-    // Assure that we create a bash function for command aliases.
-    $options['unit-extra'] = 'st;exit';
-    $this->drush('core-cli', array(), $options);
-
-    // Assure that we create a bash alias for site aliases.
-    // First, write an alias file to the sandbox.
-    $path = UNISH_SANDBOX . '/aliases.drushrc.php';
-    $aliases['cliAlias'] = array(
-      'root' => $this->sites['dev']['root'],
-      'uri' => 'dev',
-    );
-    $contents = $this->file_aliases($aliases);
-    $return = file_put_contents($path, $contents);
-    // Append a bash command which starts with alias name (i.e. @cliAlias).
-    $options['unit-extra'] = sprintf('@cliAlias core-status --alias-path=%s;exit', UNISH_SANDBOX);
-    $options['alias-path'] = UNISH_SANDBOX;
-    $this->drush('core-cli', array(), $options);
-
-    // $this->markTestIncomplete('In progress below.');
-    // Exercise core-cli's non-interactive mode.
-    // We spawn our own bash session using the --pipe feature of core-cli.
-    //$options = array(
-    //  'pipe' => NULL,
-    //  'alias-path' => UNISH_SANDBOX,
-    //);
-    //$this->drush('core-cli', array(), $options);
-    //$bashrc_data = $this->getOutput();
-    //$bashrc_file = UNISH_SANDBOX . '/.bashrc';
-    //$extra = 'cd @cliAlias;exit;';
-    //$return = file_put_contents($bashrc_file, $bashrc_data . $extra);
-    //$this->setUpDrupal('dev', FALSE);
-    //$this->execute('bash --rcfile ' . $bashrc_file);
-    //$output = $this->getOutput();
-    //$this->assertContains('????', $output);
+    // Verify that there are no severity 2 items in the status report
+    $this->drush('core-requirements', array(), $options + array('severity' => '2'));
+    $output = $this->getOutput();
+    $this->assertEquals('', $output);
+    $this->drush('core-requirements', array(), $options);
+    $output = $this->getOutput();
+    $expected="database_system: -1
+database_system_version: -1
+drupal: -1
+file system: -1
+install_profile: -1
+node_access: -1
+php: -1
+php_extensions: -1
+php_memory_limit: -1
+php_register_globals: -1
+settings.php: -1
+unicode: 0
+update: 0
+update access: -1
+update status: -1
+webserver: -1";
+    $this->assertEquals($expected, trim($output));
   }
 }

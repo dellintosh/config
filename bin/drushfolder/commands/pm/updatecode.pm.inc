@@ -17,14 +17,14 @@ function drush_pm_updatecode() {
   $security_only = drush_get_option('security-only');
 
   // Get specific requests.
-  $requests = _convert_csv_to_array(func_get_args());
-
-  // Parse out project name and version.
-  $requests = pm_parse_project_version($requests);
+  $requests = pm_parse_arguments(func_get_args(), FALSE);
 
   // Get installed extensions and projects.
   $extensions = drush_get_extensions();
   $projects = drush_get_projects($extensions);
+
+  // Parse out project name and version.
+  $requests = pm_parse_project_version($requests, $projects);
 
   // Get update status information.
   $update_info = _pm_get_update_info($projects);
@@ -39,10 +39,10 @@ function drush_pm_updatecode() {
     if (!isset($extension->info['project'])) {
       if ((isset($extension->vcs)) && ($extension->status)) {
         $update_info[$name] = array(
-          'title' => $extension->info['name'],
+          'label' => $extension->label,
           'existing_version' => 'Unknown',
           'status' => DRUSH_PM_REQUESTED_PROJECT_NOT_PACKAGED,
-          'status_msg' => dt('Project was not packaged by drupal.org but obtained from !vcs. You need to enable !vcs_deploy module', array('!vcs' => $extension->vcs))
+          'status_msg' => dt('Project was not packaged by drupal.org but obtained from !vcs. You need to enable !vcs_deploy module', array('!vcs' => $extension->vcs)),
         );
         // The user may have requested to update a project matching this
         // extension. If it was by coincidence or error we don't mind as we've
@@ -66,9 +66,9 @@ function drush_pm_updatecode() {
       // Disabled projects.
       if ((isset($projects[$name])) && ($projects[$name]['status'] == 0)) {
         $update_info[$name] = array(
-          'title' => $name,
+          'label' => $projects[$name]['label'],
           'existing_version' => $projects[$name]['version'],
-          'status' => DRUSH_PM_REQUESTED_PROJECT_NOT_UPDATEABLE
+          'status' => DRUSH_PM_REQUESTED_PROJECT_NOT_UPDATEABLE,
         );
         unset($requests[$name]);
       }
@@ -76,7 +76,7 @@ function drush_pm_updatecode() {
       // It does not exist at all or it is mispelled,...
       else {
         $update_info[$name] = array(
-          'title' => $name,
+          'label' => $name,
           'existing_version' => 'Unknown',
           'status'=> DRUSH_PM_REQUESTED_PROJECT_NOT_FOUND,
         );
@@ -129,7 +129,11 @@ function drush_pm_updatecode() {
   drush_print(dt('Update information last refreshed: ') . ($last  ? format_date($last) : dt('Never')));
   drush_print();
   drush_print(dt("Update status information on all installed and enabled Drupal projects:"));
-  drush_print_table($rows, TRUE, array(3 => 40), $tmpfile);
+  // Cache the output of drush_print_table in $tmpfile so that we can
+  // include it in the paginated output later.
+  $tmphandle = fopen($tmpfile, 'a');
+  drush_print_table($rows, TRUE, array(3 => 50), $tmphandle);
+  fclose($tmphandle);
   $contents = file_get_contents($tmpfile);
   drush_print($contents);
   drush_print();
@@ -231,7 +235,6 @@ function drush_pm_updatecode() {
  *   copied from $update_info['drupal'].  @see drush_pm_updatecode.
  */
 function _pm_update_core(&$project, $tmpfile) {
-  drush_include_engine('package_handler', drush_get_option('package-handler', 'wget'));
   $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
 
   drush_print(dt('Code updates will be made to drupal core.'));
@@ -240,7 +243,8 @@ function _pm_update_core(&$project, $tmpfile) {
   drush_print();
   if (drush_get_option('notes', FALSE)) {
     drush_print('Obtaining release notes for above projects...');
-    _drush_pm_releasenotes(array('drupal'), TRUE, $tmpfile);
+    $requests = pm_parse_project_version(array('drupal'));
+    release_info_print_releasenotes($requests, TRUE, $tmpfile);
   }
   if(!drush_confirm(dt('Do you really want to continue?'))) {
     drush_print(dt('Rolling back all changes. Run again with --no-core to update modules only.'));
@@ -303,7 +307,7 @@ function _pm_update_core(&$project, $tmpfile) {
   // the drupal root
   _pm_update_move_files($project['full_project_path'], $drupal_root, $project['skip_list']);
   drush_delete_dir($project['full_project_path']);
-  
+
   // Version control engines expect full_project_path to exist and be accurate.
   $project['full_project_path'] = $project['base_project_path'];
 
@@ -345,7 +349,6 @@ function _pm_update_move_files($src_dir, $dest_dir, $skip_list, $remove_conflict
  *   array key candidate_version that specifies the version to be installed.
  */
 function pm_update_packages($update_info, $tmpfile) {
-  drush_include_engine('package_handler', drush_get_option('package-handler', 'wget'));
   $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
 
   $print = '';
@@ -373,7 +376,8 @@ function pm_update_packages($update_info, $tmpfile) {
   // Print the release notes for projects to be updated.
   if (drush_get_option('notes', FALSE)) {
     drush_print('Obtaining release notes for above projects...');
-    _drush_pm_releasenotes(array_keys($update_info), TRUE, $tmpfile);
+    $requests = pm_parse_project_version(array_keys($update_info));
+    release_info_print_releasenotes($requests, TRUE, $tmpfile);
   }
 
   // We print some warnings before the user confirms the update.
@@ -395,9 +399,8 @@ function pm_update_packages($update_info, $tmpfile) {
       return drush_set_error('DRUSH_PM_UPDATING_NO_PROJECT_PATH', dt('The !project project path is not available, perhaps the !type is enabled but has been deleted from disk.', array('!project' => $project['name'], '!type' => $project['project_type'])));
     }
     drush_log(dt('Starting to update !project code at !dir...', array('!project' => $project['title'], '!dir' => $project['path'])));
-    // Create the projects directory and base (parent) directory.
+    // Define and check the full path to project directory and base (parent) directory.
     $project['full_project_path'] = $drupal_root . '/' . $project['path'];
-    // Check that the directory exists, and is where we expect it to be.
     if (stripos($project['path'], $project['project_type']) === FALSE || !is_dir($project['full_project_path'])) {
       return drush_set_error('DRUSH_PM_UPDATING_PATH_NOT_FOUND', dt('The !project directory could not be found within the !types directory at !full_project_path, perhaps the project is enabled but has been deleted from disk.', array('!project' => $project['name'], '!type' => $project['project_type'], '!full_project_path' => $project['full_project_path'])));
     }
@@ -501,14 +504,11 @@ function drush_pm_updatecode_rollback() {
  * Return an array of updateable projects and fill $rows.
  *
  * Array of updateable projects is obtained from calculated project update
- * status and $security_only flag. 
+ * status and $security_only flag.
  */
 function pm_project_filter(&$update_info, &$rows, $security_only) {
   $updateable = array();
   foreach ($update_info as $key => $project) {
-    if (empty($project['title'])) {
-      continue;
-    }
     switch($project['status']) {
       case DRUSH_PM_REQUESTED_UPDATE:
         $status = dt('Specified version available');
@@ -533,7 +533,7 @@ function pm_project_filter(&$update_info, &$rows, $security_only) {
         $status = pm_update_filter($project);
         break;
     }
-    
+
     // Special checking:  if drush decides that the candidate version is older
     // than the installed version, then we will set the candidate version to
     // the installed version.
@@ -561,7 +561,7 @@ function pm_project_filter(&$update_info, &$rows, $security_only) {
         unset($updateable[$key]);
       }
     }
-    $rows[] = array($project['title'], $project['existing_version'], $update_info[$key]['candidate_version'], $status);
+    $rows[] = array($project['label'], $project['existing_version'], $update_info[$key]['candidate_version'], $status);
   }
   return $updateable;
 }

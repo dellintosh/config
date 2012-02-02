@@ -29,6 +29,7 @@ function field_drush_command() {
       'bundle' => 'Content type (for nodes). Name of bundle to attach fields to. Required.',
       'field_spec' => 'Comma delimited triple in the form: field_name,field_type,widget_name. If widget_name is omitted, the default widget will be used. Separate multiple fields by space. If omitted, a wizard will prompt you.'
     ),
+    'required-arguments' => 1,
     'options' => array(
       'entity_type' => 'Type of entity (e.g. node, user, comment). Defaults to node.',
     ),
@@ -91,6 +92,61 @@ function field_drush_command() {
     ),
   );
   return $items;
+}
+
+/**
+ * Command argument complete callback.
+ */
+function field_field_create_complete() {
+  if (drush_bootstrap_max(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+    $all = array();
+    $info = field_info_bundles();
+    foreach ($info as $entity_type => $bundles) {
+      $all = array_merge($all, array_keys($bundles));
+    }
+    return array('values' => array_unique($bundles));
+  }
+}
+
+/**
+ * Command argument complete callback.
+ */
+function field_field_update_complete() {
+  return field_field_complete_field_names();
+}
+
+/**
+ * Command argument complete callback.
+ */
+function field_field_delete_complete() {
+  return field_field_complete_field_names();
+}
+
+/**
+ * Command argument complete callback.
+ */
+function field_field_clone_complete() {
+  return field_field_complete_field_names();
+}
+
+/**
+ * Command argument complete callback.
+ */
+function field_field_info_complete() {
+  return array('values' => array('fields', 'types'));
+}
+
+/**
+ * List field names for completion.
+ *
+ * @return
+ *  Array of available site aliases.
+ */
+function field_field_complete_field_names() {
+  if (drush_bootstrap_max(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+    $info = field_info_fields();
+    return array('values' => array_keys($info));
+  }
 }
 
 function drush_field_create($bundle) {

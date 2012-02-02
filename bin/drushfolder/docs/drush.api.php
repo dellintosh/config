@@ -130,6 +130,10 @@ function drush_hook_pre_COMMAND() {
  * for each hook implementation is invoked, in addition to pre and
  * validate rollbacks.
  *
+ * @return
+ *   The return value will be passed along to the caller if --backend option is
+ *   present. A boolean FALSE indicates failure and rollback will be intitated.
+ *
  * @see drush_hook_COMMAND_rollback()
  * @see drush_hook_pre_COMMAND_rollback()
  * @see drush_hook_COMMAND_validate_rollback()
@@ -240,6 +244,12 @@ function hook_drush_help_alter(&$command) {
     $command['options']['myoption'] = "Description of modification of sql-sync done by hook";
     $command['sub-options']['sanitize']['my-sanitize-option'] = "Description of sanitization option added by hook (grouped with --sanitize option)";
   }
+  if ($command['command'] == 'global-options') {
+    // Recommended: don't show global hook options in brief global options help.
+    if ($command['#brief'] === FALSE) {
+      $command['options']['myglobaloption'] = 'Description of option used globally in all commands (e.g. in a commandfile init hook)';
+    }
+  }
 }
 
 /**
@@ -249,20 +259,60 @@ function hook_drush_cache_clear(&$types) {
   $types['views'] = 'views_invalidate_cache';
 }
 
-/*
- * Make shell aliases and other .bashrc code available during core-cli command.
+/**
+ * Inform drush about one or more engine types.
+ *
+ * This hook allow to declare available engine types, the cli option to select
+ * between engine implementatins, which one to use by default, global options
+ * and other parameters. Commands may override this info when declaring the
+ * engines they use.
  *
  * @return
- *   Bash code typically found in a .bashrc file.
+ *   An array whose keys are engine type names and whose values describe
+ *   the characteristics of the engine type in relation to command definitions:
  *
- * @see core_cli_bashrc() for an example implementation.
+ *   - description: The engine type description.
+ *   - option: The command line option to choose an implementation for
+ *     this engine type.
+ *     FALSE means there's no option. That is, the engine type is for internal
+ *     usage of the command and thus an implementation is not selectable.
+ *   - default: The default implementation to use by the engine type.
+ *   - options: Engine options common to all implementations.
+ *   - add-options-to-command: If there's a single implementation for this
+ *     engine type, add its options as command level options.
+ *
+ * @see drush_get_engine_types_info()
+ * @see pm_drush_engine_type_info()
  */
-function hook_cli_bashrc() {
-  $string = "
-    alias siwef='drush site-install wef --account-name=super --account-mail=me@wef'
-    alias dump='drush sql-dump --structure-tables-key=wef --ordered-dump'
-  ";
-  return $string;
+function hook_drush_engine_type_info() {
+  return array(
+    'dessert' => array(
+      'description' => 'Choose a dessert while the sandwich is baked.',
+      'option' => 'dessert',
+      'default' => 'ice-cream',
+      'options' => 'sweetness',
+      'add-options-to-command' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Inform drush about one or more engines implementing a given engine type.
+ *
+ * This hook allow to declare implementations for an engine type.
+ *
+ * @see pm_drush_engine_package_handler()
+ * @see pm_drush_engine_version_control()
+ */
+function hook_drush_engine_ENGINE_TYPE() {
+  return array(
+    'ice-cream' => array(
+      'description' => 'Feature rich ice-cream with all kind of additives.',
+      'options' => array(
+        'flavour' => 'Choose your favorite flavour',
+      ),
+    ),
+  );
 }
 
 /**
