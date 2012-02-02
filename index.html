@@ -1,1 +1,98 @@
-Configs
+<h1>Profile Management with Git and GitHub</h1>
+<p>The following describes a simple way to manage you profile configuration files using GitHub.</p>
+
+<h3>Features</h3>
+
+<ul>
+<li>Centralized configuration management</li>
+<li>Files live in their native locations (no symbolic linking)</li>
+<li>Home directory is not a Git repository</li>
+<li>All the power of git with a simple alias</li>
+</ul>
+
+<h3>Setup Repository</h3>
+
+<ul>
+<li>Log into <a href="http://github.com/" title="GitHub">GitHub</a> and create a repository named config</li>
+<li>Add your <a href="http://github.com/guides/providing-your-ssh-key" title="Public Keys to GithHub">public keys to GitHub</a> (if you haven't done so already)</li>
+<li><p>Open a terminal and switch to your home directory</p>
+
+<pre><code class="prettyprint">cd ~
+</code></pre></li>
+<li><p>Create a configuration directory</p>
+
+<pre><code class="prettyprint">mkdir .config.git
+</code></pre></li>
+<li><p>Add the following alias to your current session and your <code class="prettyprint">.bash_profile</code></p>
+
+<pre><code class="prettyprint">alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'
+echo "alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'" &gt;&gt; .bash_profile
+</code></pre></li>
+<li><p>Add your <code class="prettyprint">.bash_profile</code> to the configuration repository</p>
+
+<pre><code class="prettyprint">config add .bash_profile
+</code></pre></li>
+<li><p>Commit the changes</p>
+
+<pre><code class="prettyprint">config commit -m 'Initial commit'
+</code></pre></li>
+<li><p>Change the origin to GitHub</p>
+
+<pre><code class="prettyprint">config remote add origin git@github.com:GITHUB_USERNAME/config.git
+</code></pre></li>
+<li><p>Push the changes</p>
+
+<pre><code class="prettyprint">config push origin master
+</code></pre></li>
+</ul>
+
+<p>If you get an error when running <code class="prettyprint">config pull</code> to the effect of <code class="prettyprint">You asked me to pull without...</code> run the follow:</p>
+
+<pre><code class="prettyprint">    echo -e '[branch "master"]\n  remote = origin\n  merge = refs/heads/master' &gt;&gt; ~/.config.git/config
+</code></pre>
+
+<h3>Setup Configuration Management on a Different System</h3>
+
+<ol>
+<li>Add your <a href="http://github.com/guides/providing-your-ssh-key" title="Public Keys to GithHub">public keys to GitHub</a> (if you haven't done so already)</li>
+<li><p>Switch to your home directory</p>
+
+<pre><code class="prettyprint">cd ~
+</code></pre></li>
+<li><p>Backup your local configuration files, example:</p>
+
+<pre><code class="prettyprint">mv .bash_profile .bash_profile.bk
+</code></pre></li>
+<li><p>Clone your configuration repository</p>
+
+<pre><code class="prettyprint">git clone git@github.com:GITHUB_USERNAME/config.git config.git
+</code></pre></li>
+<li><p>Move the git metadata to <code class="prettyprint">~/.config.git</code></p>
+
+<pre><code class="prettyprint">mv config.git/.git .config.git
+</code></pre></li>
+<li><p>Enable dotglob</p>
+
+<pre><code class="prettyprint">shopt -s dotglob
+</code></pre></li>
+<li><p>Move your configuration files to your home directory</p>
+
+<pre><code class="prettyprint">mv -i config.git/* .
+</code></pre></li>
+<li><p>Delete the <code class="prettyprint">config.git</code> directory</p>
+
+<pre><code class="prettyprint">rmdir config.git
+</code></pre></li>
+<li><p>Logout and log back in</p></li>
+</ol>
+
+<h3>Basic Usage</h3>
+
+<ul>
+<li><code class="prettyprint">config pull</code> - get latest configuration changes</li>
+<li><code class="prettyprint">config add FILENAME</code> - add a configuration file</li>
+<li><code class="prettyprint">config commit -a</code> - save all configuration changes</li>
+<li><code class="prettyprint">config push</code> - push configuration changes to GitHub</li>
+<li>and any other <code class="prettyprint">config GIT_OPTION</code></li>
+</ul>
+
