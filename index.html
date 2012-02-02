@@ -71,10 +71,6 @@ echo "alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'" &gt;&gt
 
 <pre><code class="prettyprint">mv config.git/.git .config.git
 </code></pre></li>
-<li><p>Enable dotglob</p>
-
-<pre><code class="prettyprint">shopt -s dotglob
-</code></pre></li>
 <li><p>Move your configuration files to your home directory</p>
 
 <pre><code class="prettyprint">mv -i config.git/* .
@@ -96,3 +92,4 @@ echo "alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'" &gt;&gt
 <li>and any other <code class="prettyprint">config GIT_OPTION</code></li>
 </ul>
 
+<p>Source: Manage your $HOME with git by Robert Escriva</p>
