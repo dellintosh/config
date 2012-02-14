@@ -1,2 +1,6 @@
 ohmyzsh:
-	curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
+	@echo "Cloning..."
+	@git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+	@echo "Reset (restart) your shell!"
+
+
