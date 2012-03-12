@@ -31,14 +31,13 @@ alias pdbot='python /usr/lib/python2.5/site-packages/robotframework-2.1.1-py2.5.
 alias macterm='export TERM=xterm-color'
 
 #LodgeNet
-alias linstall="$SANDBOX/scripts/drupal_install.sh -u lnet -p 1pass234 -fmr -ld -no-swf -d lnetPortal"
+alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -fmr -ld -no-swf -d jluthylnetPortal"
 alias zsource="source ~/.zshrc"
 alias cdt="cd $SANDBOX"
 alias cdl="cd $SANDBOX/tests/lettuce"
 alias jenkins="ssh -A ptd-its.ct.lodgenet.com"
 alias murdock="ssh -A etd-atd1.ct.lodgenet.com"
 alias hannibal="ssh -A hannibal.ct.lodgenet.com"
-alias drush="~/bin/drushfolder/drush.php --uri=http://lnetportal.local"
 alias ptest="nocorrect ptest"
 alias envision="ssh -A envision.lodgenet.com"
 alias aegir="ssh -A aegir.ct.lodgenet.com"

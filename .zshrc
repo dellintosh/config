@@ -1,5 +1,11 @@
+# set umask
+umask 0002 # group writable
+
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
+
+# Set umask so brew stops complaining about stuff not owned by group
+umask 002
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -35,17 +41,18 @@ plugins=(git osx brew python svn)
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=~/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11/bin
+export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin
 
 #iTerm / Maccy stuff
 growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
 export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
-export LNETPORTAL_URL=http://lnetportal.local/
+export LNETPORTAL_URL=http://jluthy.local/
 export DEBUG=1
 export MAXIMIZE=1
-export SANDBOX="/src/portal"
+export SANDBOX="${HOME}/src/portal"
+export PYTHONPATH="${SANDBOX}/tests/python"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
 
