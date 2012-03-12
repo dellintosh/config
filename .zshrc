@@ -45,7 +45,7 @@ export EDITOR='vim'
 export LNETPORTAL_URL=http://lnetportal.local/
 export DEBUG=1
 export MAXIMIZE=1
-export SANDBOX="~/src/portal"
+export SANDBOX="/src/portal"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
 
