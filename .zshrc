@@ -36,12 +36,12 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git osx brew python svn)
+plugins=(git osx brew python svn sublime)
 
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin
+export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin:/Users/jluthy/pear/bin
 
 #iTerm / Maccy stuff
 growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
