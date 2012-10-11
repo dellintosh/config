@@ -48,10 +48,10 @@ growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
 export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
-export LNETPORTAL_URL=http://jluthy.local/
+export LNETPORTAL_URL=http://`hostname`/
 export DEBUG=1
 export MAXIMIZE=1
-export SANDBOX="${HOME}/src/portal"
+export SANDBOX="/src/portal"
 export PYTHONPATH="${SANDBOX}/tests/python"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
