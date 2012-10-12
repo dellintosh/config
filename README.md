@@ -42,8 +42,8 @@ config remote add origin git@github.com:GITHUB_USERNAME/config.git
 config push origin master
 ```
 
-On Other Systems
-----------------
+Install on Other Computers
+--------------------------
 
 1. [Add public keys][pubkeys] to Gihub
 
@@ -75,8 +75,8 @@ rmdir config.git
 
 7. Restart terminal session
 
-Usage
------
+Basic Usage
+-----------
 
   * `config pull` : get latest configuration changes
   * `config add FILENAME` : add configuration file
