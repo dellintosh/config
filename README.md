@@ -17,24 +17,25 @@ Initialization
 1. Login to Github and create a repository named config
 2. Add public keys to Github (if you haven't already done so)
 3. Create Configuration directory
-
-    cd ~
-    mkdir .config.git
-
+```bash
+cd ~
+mkdir .config.git
+```
 4. Add the following alias to your current session and your `.bash_profile`
-
-    alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'
-    echo "alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'" >> .bash_profile
-
+```bash
+alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'
+echo "alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'" >> .bash_profile
+```
 5. Add `.bash_profile` to the configuration repository and commit
-
-    config add .bash_profile
-    config commit -m 'Initial Commit'
-
+```bash
+config add .bash_profile
+config commit -m 'Initial Commit'
+```
 6. Change origin to Github and push changes
-
-    config remote add origin git@github.com:GITHUB_USERNAME/config.git
-    config push origin master
+```bash
+config remote add origin git@github.com:GITHUB_USERNAME/config.git
+config push origin master
+```
 
 Using on Other Systems
 ----------------------
