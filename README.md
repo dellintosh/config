@@ -42,8 +42,8 @@ config remote add origin git@github.com:GITHUB_USERNAME/config.git
 config push origin master
 ```
 
-Using on Other Systems
-----------------------
+On Other Systems
+----------------
 
 1. [Add public keys][pubkeys] to Gihub
 
