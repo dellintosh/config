@@ -38,6 +38,9 @@ COMPLETION_WAITING_DOTS="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(git osx brew python svn sublime)
 
+autoload -U zmv
+alias mmv='noglob zmv -W'
+
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
@@ -49,11 +52,12 @@ export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
 export LNETPORTAL_URL=http://`hostname`/
+export WORKON_HOME=~/.virtualenvs
 export DEBUG=1
 export MAXIMIZE=1
 export SANDBOX="/src/portal"
 export PYTHONPATH="${SANDBOX}/tests/python"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
-
+source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases

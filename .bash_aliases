@@ -33,8 +33,9 @@ alias macterm='export TERM=xterm-color'
 #LodgeNet
 alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -fmr -ld -no-swf -d jluthylnetPortal"
 alias zsource="source ~/.zshrc"
-alias cdt="cd $SANDBOX"
-alias cdl="cd $SANDBOX/tests/lettuce"
+alias cdt="cd $SANDBOX; workon portal"
+alias cdmq="cd ~/src/lodgenet-mq; workon lodgenet-mq"
+alias cdl="cd $SANDBOX/tests/lettuce; workon portal"
 alias jenkins="ssh -A jenkins@ptd-its.ct.lodgenet.com"
 alias murdock="ssh -A etd-atd1.ct.lodgenet.com"
 alias hannibal="ssh -A hannibal.ct.lodgenet.com"
