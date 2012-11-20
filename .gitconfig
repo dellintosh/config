@@ -22,3 +22,5 @@
 	diff = auto
 [diff]
 	tool = opendiff 
+[push]
+	default = upstream
