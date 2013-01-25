@@ -31,7 +31,8 @@ alias pdbot='python /usr/lib/python2.5/site-packages/robotframework-2.1.1-py2.5.
 alias macterm='export TERM=xterm-color'
 
 #LodgeNet
-alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -d jluthylnetPortal"
+alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -fmr -d jluthylnetPortal"
+alias drush="/usr/local/bin/drush --uri=dawnchaser.ct.lodgenet.com --root=$SANDBOX/drupal"
 alias zsource="source ~/.zshrc"
 alias cdt="cd $SANDBOX; workon portal"
 alias cdmq="cd ~/src/lodgenet-mq; workon lodgenet-mq"
