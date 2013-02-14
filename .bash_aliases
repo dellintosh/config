@@ -32,9 +32,10 @@ alias macterm='export TERM=xterm-color'
 
 #LodgeNet
 alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -fmr -d jluthylnetPortal"
-alias drush="/usr/local/bin/drush --uri=dawnchaser.ct.lodgenet.com --root=$SANDBOX/drupal"
+#alias drush="/usr/local/bin/drush --uri=dawnchaser.ct.lodgenet.com --root=$SANDBOX/drupal"
 alias zsource="source ~/.zshrc"
 alias cdt="cd $SANDBOX; workon portal"
+alias cdfl="cd ~/src/flaskerture; workon flaskerture"
 alias cdmq="cd ~/src/lodgenet-mq; workon lodgenet-mq"
 alias cdl="cd $SANDBOX/tests/lettuce; workon portal"
 alias jenkins="ssh -A jenkins@ptd-its.ct.lodgenet.com"

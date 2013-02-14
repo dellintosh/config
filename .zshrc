@@ -61,3 +61,6 @@ export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
 source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
