@@ -2,7 +2,7 @@
 	name = Justus Luthy
 	email = jluthy@lodgenet.com
 [merge]
-	tool = opendiff 
+	tool = opendiff
 [giggle]
 	compact-mode = true
 	main-window-maximized = true
@@ -21,6 +21,8 @@
 	interactive = auto
 	diff = auto
 [diff]
-	tool = opendiff 
+	tool = opendiff
 [push]
 	default = upstream
+[commit]
+  template = ~/.gitmessage.txt

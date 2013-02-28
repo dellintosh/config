@@ -59,7 +59,7 @@ export SANDBOX="/src/portal"
 export PYTHONPATH="${SANDBOX}/tests/python"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
-source /usr/local/bin/virtualenvwrapper.sh
+source /usr/local/share/python/virtualenvwrapper.sh
 source ~/.bash_aliases
 
 ### Added by the Heroku Toolbelt
