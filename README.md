@@ -19,7 +19,7 @@ Features
 Initialization
 --------------
 
-1. Login to Github and create a repository named config
+1. Login to Github and create a repository named config (or [Fork this one](https://github.com/dellintosh/config/fork))
 
 2. [Add public keys][pubkeys] to Github (if you haven't already done so)
 
