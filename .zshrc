@@ -52,14 +52,14 @@ export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
 export LNETPORTAL_URL=http://`hostname`/
-export WORKON_HOME=~/.virtualenvs
+export WORKON_HOME=$HOME/.virtualenvs
 export DEBUG=1
 export MAXIMIZE=1
 export SANDBOX="/src/portal"
 export PYTHONPATH="${SANDBOX}/tests/python"
 export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
-source /usr/local/share/python/virtualenvwrapper.sh
+source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases
 
 ### Added by the Heroku Toolbelt
