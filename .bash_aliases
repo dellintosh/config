@@ -35,6 +35,7 @@ alias linstall="$SANDBOX/scripts/drupal_install.sh -u root -fmr -d jluthylnetPor
 alias drush="/usr/local/bin/drush --uri=orgrimmar.ct.lodgenet.com --root=$SANDBOX/drupal"
 alias zsource="source ~/.zshrc"
 alias cdt="cd $SANDBOX; workon portal"
+alias cdw="cd ~/src/wonderboom_back; workon wonderboom"
 alias cdfl="cd ~/src/flaskerture; workon flaskerture"
 alias cdmq="cd ~/src/lodgenet-mq; workon lodgenet-mq"
 alias cdl="cd $SANDBOX/tests/lettuce; workon portal"
