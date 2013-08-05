@@ -9,13 +9,6 @@ configuration files using GitHub.
  * Home directory is not a Git repository
  * All the power of git with a simple alias
 
-Features
---------
- * Centralized configuration management
- * Files live in their native locations (no symbolic linking)
- * Home directory is not a Git repository
- * All the power of git with a simple alias
-
 Initialization
 --------------
 
