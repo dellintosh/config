@@ -1,6 +1,6 @@
 [user]
 	name = Justus Luthy
-	email = jluthy@lodgenet.com
+	email = jluthy@sonifi.com
 [merge]
 	tool = opendiff
 [giggle]
@@ -15,6 +15,7 @@
 	last = log -1 HEAD
   tagshow = !sh -c 'git show-ref --tags | sort'
 	di = diff
+  score = shortlog -s -n
 [color]
 	status = auto
 	branch = auto
@@ -30,7 +31,7 @@
 	excludesfile = /Users/jluthy/.gitignore_global
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true

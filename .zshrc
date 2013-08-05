@@ -52,6 +52,7 @@ export EDITOR='vim'
 
 # stuff for lnetPortal testing/operation
 export LNETPORTAL_URL=http://drupal.`hostname`/
+export PORTAL_URL=http://`hostname`/
 export SQLALCHEMY_DRUPAL_CONNECT_STRING=mysql://root@localhost/jluthylnetPortal
 export WORKON_HOME=$HOME/.virtualenvs
 export DEBUG=1
@@ -62,6 +63,16 @@ export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
 #export XDEBUG_CONFIG='idekey=bananasandwich'
 source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases
+
+export TESTRUNNER_EXEC='nosetests --with-spec --spec-color --nologcapture'
+export LETTUCERUNNER='lettuce -t -in_dev'
+export TESTER_TOKEN='justus-tests'
+
+# PostgreSQL
+export PGHOST=localhost
+export PGUSER=postgres
+export BOOM_DB_NAME=wonderboom_dev_db
+export BOOM_DB_PASSWORD=thisisnotasecurepasswordatall
 
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
