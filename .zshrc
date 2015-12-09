@@ -45,22 +45,10 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin:/Users/jluthy/pear/bin
-export PATH="$(brew --prefix josegonzalez/php/php53)/bin:$PATH"
 #iTerm / Maccy stuff
 growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
 export EDITOR='vim'
 
-# stuff for lnetPortal testing/operation
-export LNETPORTAL_URL=http://drupal.`hostname`/
-export PORTAL_URL=http://`hostname`/
-export SQLALCHEMY_DRUPAL_CONNECT_STRING=mysql://root@localhost/jluthylnetPortal
-export WORKON_HOME=$HOME/.virtualenvs
-export DEBUG=1
-export MAXIMIZE=1
-export SANDBOX="/src/portal"
-export PYTHONPATH="${SANDBOX}/tests/python"
-export CMS_DROPBOX_LOCATION=/Volumes/envision/testing/cms
-#export XDEBUG_CONFIG='idekey=bananasandwich'
 source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases
 
