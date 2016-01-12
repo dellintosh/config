@@ -14,6 +14,8 @@ alias bpython='nocorrect bpython'
 
 #git / svn
 alias sst="svn status"
+alias svnpull="git svn rebase"
+alias svnpush="git svn dcommit"
 alias pull="git pull"
 alias push="git push"
 alias gbr='git branch'
@@ -25,6 +27,8 @@ alias config='git --git-dir=$HOME/.config.git/ --work-tree=$HOME'
 
 alias gsvnpull='git svn rebase'
 alias gsvnpush='git svn dcommit'
+alias svnpush='git stash; git svn dcommit; git stash pop'
+alias svnpull='git stash; git svn rebase; git stash pop'
 
 #Linux
 alias pdbot='python /usr/lib/python2.5/site-packages/robotframework-2.1.1-py2.5.egg/robot/runner.py --noncritical noncritical --exclude notimplemented -L DEBUG'
@@ -36,15 +40,15 @@ alias drush="/usr/local/bin/drush --uri=orgrimmar.ct.lodgenet.com --root=$SANDBO
 alias zsource="source ~/.zshrc"
 alias cdt="cd $SANDBOX; workon portal"
 alias cdw="cd ~/src/wonderboom; workon wonderboom"
-alias cdb="cd ~/src/wonderboom/back; workon wonderboom"
+alias cda="cd ~/src/services; workon services"
 alias cdf="cd ~/src/wonderboom/front; workon wonderboom"
 alias cdfl="cd ~/src/flaskerture; workon flaskerture"
-alias cdmq="cd ~/src/lodgenet-mq; workon lodgenet-mq"
+alias cdmq="cd ~/src/mq_bots; workon mq"
 alias cdl="cd $SANDBOX/tests/lettuce; workon portal"
 alias jenkins="ssh -A jenkins@ptd-its.ct.lodgenet.com"
 alias murdock="ssh -A etd-atd1.ct.lodgenet.com"
 alias hannibal="ssh -A hannibal.ct.lodgenet.com"
-alias ptest="nocorrect ptest"
+alias ptest="nosetests --with-specplugin --nologcapture"
 alias envision="ssh -A envision.lodgenet.com"
 alias aegir="ssh -A aegir.ct.lodgenet.com"
-
+alias svcprod="ssh -A services@services.expansionadvance.net"

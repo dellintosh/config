@@ -11,7 +11,8 @@ umask 002
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="mrtazz"
+#ZSH_THEME="mrtazz"
+ZSH_THEME="amuse"
 
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
@@ -63,5 +64,6 @@ export BOOM_DB_NAME=wonderboom_dev_db
 export BOOM_DB_PASSWORD=thisisnotasecurepasswordatall
 
 ### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
+export PATH="/usr/local/heroku/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:~/.local/bin:$PATH"
 export DRUPAL_DB_NAME="jluthylnetPortal"
+source /Users/jluthy/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
