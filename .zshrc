@@ -67,3 +67,50 @@ export BOOM_DB_PASSWORD=thisisnotasecurepasswordatall
 export PATH="/usr/local/heroku/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:~/.local/bin:$PATH"
 export DRUPAL_DB_NAME="jluthylnetPortal"
 source /Users/jluthy/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
+
+function setDockerEnvVars {
+    local target="/Users/jluthy/Vagrant/boot2docker/.env"
+    if [[ -a ${target} ]]; then
+        source ${target}
+    else
+        unset DOCKER_TLS_VERIFY
+        unset DOCKER_HOST
+        unset DOCKER_CERT_PATH
+    fi
+}
+
+# tweak title bar
+function precmd {
+    # vcs_info
+    # Put the string "hostname::/full/directory/path" in the title bar:
+    echo -ne "\e]2;$(hostname -s)::$PWD\a"
+    # Put the parentdir/currentdir in the tab
+    echo -ne "\e]1;$PWD:h:t/$PWD:t\a"
+}
+
+function set_running_app {
+    printf "\e]1; $PWD:t:$(history $HISTCMD | cut -b7- ) \a"
+}
+
+function preexec {
+    setDockerEnvVars
+    set_running_app
+}
+
+function postexec {
+    set_running_app
+}
+
+function startDocker {
+    (cd ~/Vagrant/boot2docker ; vagrant up 1>/dev/null)
+    setDockerEnvVars
+}
+
+function stopDocker {
+    (cd ~/Vagrant/boot2docker ; vagrant halt )
+}
+
+function docker {
+    [ ! -n "${DOCKER_TLS_VERIFY+x}" ] && startDocker
+    /usr/local/bin/docker "$@"
+}
