@@ -37,7 +37,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git osx brew python svn sublime)
+plugins=(git osx brew python)
 
 autoload -U zmv
 alias mmv='noglob zmv -W'
@@ -53,32 +53,8 @@ export EDITOR='vim'
 source /usr/local/bin/virtualenvwrapper.sh
 source ~/.bash_aliases
 
-export TESTRUNNER_EXEC='nosetests --with-spec --spec-color --nologcapture'
-export LETTUCERUNNER='lettuce -t -in_dev'
-export TESTER_TOKEN='justus-tests'
-
-# PostgreSQL
-export PGHOST=localhost
-export PGUSER=postgres
-export BOOM_DB_NAME=wonderboom_dev_db
-export BOOM_DB_PASSWORD=thisisnotasecurepasswordatall
-
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:~/.local/bin:$PATH"
-export DRUPAL_DB_NAME="jluthylnetPortal"
 source /usr/local/lib/python3.7/site-packages/powerline/bindings/zsh/powerline.zsh
 # source /Users/jluthy/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
-
-function setDockerEnvVars {
-    local target="/Users/jluthy/Vagrant/boot2docker/.env"
-    if [[ -a ${target} ]]; then
-        source ${target}
-    else
-        unset DOCKER_TLS_VERIFY
-        unset DOCKER_HOST
-        unset DOCKER_CERT_PATH
-    fi
-}
 
 # tweak title bar
 function precmd {
@@ -87,31 +63,4 @@ function precmd {
     echo -ne "\e]2;$(hostname -s)::$PWD\a"
     # Put the parentdir/currentdir in the tab
     echo -ne "\e]1;$PWD:h:t/$PWD:t\a"
-}
-
-function set_running_app {
-    printf "\e]1; $PWD:t:$(history $HISTCMD | cut -b7- ) \a"
-}
-
-function preexec {
-    setDockerEnvVars
-    set_running_app
-}
-
-function postexec {
-    set_running_app
-}
-
-function startDocker {
-    (cd ~/Vagrant/boot2docker ; vagrant up 1>/dev/null)
-    setDockerEnvVars
-}
-
-function stopDocker {
-    (cd ~/Vagrant/boot2docker ; vagrant halt )
-}
-
-function docker {
-    [ ! -n "${DOCKER_TLS_VERIFY+x}" ] && startDocker
-    /usr/local/bin/docker "$@"
 }
