@@ -45,7 +45,7 @@ alias mmv='noglob zmv -W'
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin:/Users/jluthy/pear/bin
+export PATH=/usr/local/bin:/usr/bin:/bin:~/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/X11/bin:/src/devconfigs/bin:/Users/jluthy/pear/bin:/usr/local/opt/python/libexec/bin:$PATH
 #iTerm / Maccy stuff
 growl() { echo -e $'\e]9;'${1}'\007' ; return  ; }
 export EDITOR='vim'
@@ -66,7 +66,8 @@ export BOOM_DB_PASSWORD=thisisnotasecurepasswordatall
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:~/.local/bin:$PATH"
 export DRUPAL_DB_NAME="jluthylnetPortal"
-source /Users/jluthy/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
+source /usr/local/lib/python3.7/site-packages/powerline/bindings/zsh/powerline.zsh
+# source /Users/jluthy/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
 
 function setDockerEnvVars {
     local target="/Users/jluthy/Vagrant/boot2docker/.env"

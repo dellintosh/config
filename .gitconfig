@@ -1,6 +1,6 @@
 [user]
 	name = Justus Luthy
-	email = jluthy@expansioncapitalgroup.com
+	email = jluthy@coinlion.com
 [merge]
 	tool = opendiff
 [giggle]
@@ -31,7 +31,7 @@
 	excludesfile = /Users/jluthy/.gitignore_global
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
